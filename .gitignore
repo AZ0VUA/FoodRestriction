@@ -1,1 +1,67 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+*.jar
 
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Gradle
+.gradle/
+gradle/
+build/
+gradlew
+gradlew.bat
+
+# Eclipse
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IntelliJ
+out/
+
+# Spigot/Paper
+.classpath
+.project
+
+# Runtime
+*.log
+run/
+eula.txt
+server.properties
+usercache.json
+banned-ips.json
+banned-players.json
+ops.json
+whitelist.json
+world/
+world_nether/
+world_the_end/
+plugins/FoodRestriction/zones.yml
+
+# Testing
+test-results/
+.coverage
+
+# OS
+Thumbs.db
+.DS_Store
+*.tmp

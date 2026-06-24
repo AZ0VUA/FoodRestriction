@@ -1,1 +1,33 @@
+name: FoodRestriction
+version: 1.0.0
+main: com.foodrestriction.FoodRestrictionPlugin
+description: "Плагін для обмеження їжі на серверу з розміткою територій"
+author: YourName
+api-version: "1.20"
 
+commands:
+  foodzone:
+    description: "Керування зонами їжі"
+    usage: "/foodzone <create|delete|list|tp> [назва]"
+    aliases: [fz]
+  foodreload:
+    description: "Перезавантажити конфіг плагіна"
+    usage: "/foodreload"
+    aliases: [fr]
+
+permissions:
+  foodrestriction.zone.create:
+    description: "Дозвіл на створення зон їжі"
+    default: op
+  foodrestriction.zone.delete:
+    description: "Дозвіл на видалення зон їжі"
+    default: op
+  foodrestriction.zone.list:
+    description: "Дозвіл на перегляд списку зон"
+    default: true
+  foodrestriction.reload:
+    description: "Дозвіл на перезавантаження конфіга"
+    default: op
+  foodrestriction.bypass:
+    description: "Байпас обмеження на їжу"
+    default: op

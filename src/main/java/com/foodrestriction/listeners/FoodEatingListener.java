@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.World;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.action.Action;
+import org.bukkit.event.block.Action;
 import com.foodrestriction.FoodRestrictionPlugin;
 import com.foodrestriction.ZoneMarker;
 import com.foodrestriction.config.ConfigManager.FoodZone;

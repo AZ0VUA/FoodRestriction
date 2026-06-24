@@ -1,1 +1,27 @@
-
+zones:
+  Taverna:
+    world: "world"
+    x1: 100
+    y1: 60
+    z1: 100
+    x2: 200
+    y2: 150
+    z2: 200
+  
+  Inn:
+    world: "world"
+    x1: 300
+    y1: 64
+    z1: 300
+    x2: 350
+    y2: 120
+    z2: 350
+  
+  Market:
+    world: "world"
+    x1: 500
+    y1: 64
+    z1: 500
+    x2: 600
+    y2: 100
+    z2: 600

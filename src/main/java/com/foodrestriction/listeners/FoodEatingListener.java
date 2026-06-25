@@ -28,6 +28,10 @@ public class FoodEatingListener implements Listener {
         ItemStack item = event.getItem();
         Action action = event.getAction();
         
+        // ════════════════════════════════════════════════════════════
+        // МОТИГА ДЛЯ ПОЗНАЧЕННЯ МЕНЬНИЦІ (ТІЛЬКИ ДЛЯ АДМИНІВ)
+        // ════════════════════════════════════════════════════════════
+        
         if (item != null && item.getType() == Material.NETHERITE_PICKAXE) {
             
             if (!player.isOp() && !player.hasPermission("foodrestriction.zone.create")) {
@@ -77,75 +81,89 @@ public class FoodEatingListener implements Listener {
             }
         }
         
+        // ════════════════════════════════════════════════════════════
+        // БЛОКУВАННЯ ЇЖІ - ПЕРЕВІРКА ДОЗВОЛЕНОЇ ЗОНИ
+        // ════════════════════════════════════════════════════════════
+        
         if (item == null) {
             return;
         }
         
+        // ПЕРЕВІРКА ЧИ ЦЕ ЇЖА
         if (!isFoodItem(item.getType())) {
             return;
         }
         
-        // АДМІНИ МОЖУТЬ ЇСТИ СКРІЗЬ
-        if (player.isOp() || player.hasPermission("foodrestriction.bypass")) {
-            return;
-        }
-        
-        World world = player.getWorld();
-        String worldName = world.getName();
-        
-        // ⚠️ ЗАПРЕТ В НЕТЕР (АДУ) - НІХТО НЕ МОЖЕ ЇСТИ
-        if (worldName.contains("nether")) {
-            event.setCancelled(true);
-            player.sendMessage(ChatColor.DARK_RED + "💀💀💀 НІХТО НЕ МОЖЕ ЇСТИ В АДУ! 💀💀💀");
-            return;
-        }
-        
-        // ЗАПРЕТ В END
-        if (worldName.contains("end")) {
-            event.setCancelled(true);
-            player.sendMessage(ChatColor.DARK_PURPLE + "✗ Ти не можеш їсти в Ендерміру!");
-            return;
-        }
-        
-        // ПЕРЕВІРКА ДОЗВОЛЕНОЇ ЗОНИ В ЗВИЧАЙНОМУ СВІТІ
+        // ПЕРЕВІРКА ДОЗВОЛЕНОЇ ЗОНИ
         FoodZone zone = plugin.getConfigManager().getZoneAtLocation(player.getLocation());
         
+        // ✅ ЯКЩО ГРАВЕЦЬ В ДОЗВОЛЕНІЙ ЗОНІ - МОЖНА ЇСТИ
         if (zone != null) {
-            return;
+            return; // ДОЗВОЛИТИ ЇЖУ
         }
         
+        // ⛔ ЯКЩО ГРАВЕЦЬ НЕ В ДОЗВОЛЕНІЙ ЗОНІ - ЗАПРЕТИТИ ЇЖУ
         event.setCancelled(true);
-        player.sendMessage(ChatColor.RED + "✗ У цьому місці їжа заборонена!");
-        player.sendMessage(ChatColor.YELLOW + "📍 Йди в дозволену територію для їжи.");
+        player.sendMessage(ChatColor.DARK_RED + "╔═══════════════════════════════════╗");
+        player.sendMessage(ChatColor.DARK_RED + "║ ⛔ ЇЖА ЗАПРЕТЕНА! ⛔              ║");
+        player.sendMessage(ChatColor.DARK_RED + "╠═══════════════════════════════════╣");
+        player.sendMessage(ChatColor.YELLOW + "║ Ти можеш їсти ТІЛЬКИ в зонах     ║");
+        player.sendMessage(ChatColor.WHITE + "║ /foodzone list - список зон      ║");
+        player.sendMessage(ChatColor.DARK_RED + "╚═══════════════════════════════════╝");
     }
     
     private boolean isFoodItem(Material material) {
         switch (material) {
+            // ФРУКТИ
             case APPLE:
-            case BAKED_POTATO:
-            case BEEF:
-            case BREAD:
-            case CARROT:
-            case COD:
             case GOLDEN_APPLE:
-            case GOLDEN_CARROT:
+            case ENCHANTED_GOLDEN_APPLE:
             case MELON_SLICE:
-            case MUTTON:
-            case PORKCHOP:
-            case POTATO:
-            case PUFFERFISH:
-            case RABBIT:
-            case SALMON:
-            case SUSPICIOUS_STEW:
-            case SWEET_BERRIES:
-            case TROPICAL_FISH:
-            case COCOA_BEANS:
-            case COOKIE:
-            case DRIED_KELP:
             case GLOW_BERRIES:
+            case SWEET_BERRIES:
+            
+            // ОВОЧІ
+            case CARROT:
+            case GOLDEN_CARROT:
+            case POTATO:
+            case BAKED_POTATO:
+            
+            // М'ЯСО
+            case BEEF:
+            case PORKCHOP:
+            case MUTTON:
+            case CHICKEN:
+            case RABBIT:
+            case COOKED_BEEF:
+            case COOKED_PORKCHOP:
+            case COOKED_MUTTON:
+            case COOKED_CHICKEN:
+            case COOKED_RABBIT:
+            
+            // РИБА
+            case COD:
+            case SALMON:
+            case TROPICAL_FISH:
+            case PUFFERFISH:
+            case COOKED_COD:
+            case COOKED_SALMON:
+            
+            // ХЛІБОБУЛОЧНІ
+            case BREAD:
+            case COOKIE:
+            
+            // ІНШЕ
+            case SUSPICIOUS_STEW:
+            case MUSHROOM_STEW:
+            case BEETROOT:
+            case BEETROOT_SOUP:
+            case DRIED_KELP:
+            case COCOA_BEANS:
             case HONEY_BOTTLE:
             case ROTTEN_FLESH:
             case SPIDER_EYE:
+            case PUMPKIN_PIE:
+            case CAKE:
                 return true;
             default:
                 return false;

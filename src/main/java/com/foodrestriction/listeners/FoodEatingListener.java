@@ -85,6 +85,7 @@ public class FoodEatingListener implements Listener {
             return;
         }
         
+        // АДМІНИ МОЖУТЬ ЇСТИ СКРІЗЬ
         if (player.isOp() || player.hasPermission("foodrestriction.bypass")) {
             return;
         }
@@ -92,18 +93,21 @@ public class FoodEatingListener implements Listener {
         World world = player.getWorld();
         String worldName = world.getName();
         
-        if (worldName.equals("world_nether") || worldName.endsWith("_nether")) {
+        // ⚠️ ЗАПРЕТ В НЕТЕР (АДУ) - НІХТО НЕ МОЖЕ ЇСТИ
+        if (worldName.contains("nether")) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED + "✗ Ти не можеш їсти в Нижнему світу!");
+            player.sendMessage(ChatColor.DARK_RED + "💀💀💀 НІХТО НЕ МОЖЕ ЇСТИ В АДУ! 💀💀💀");
             return;
         }
         
-        if (worldName.equals("world_the_end") || worldName.endsWith("_the_end")) {
+        // ЗАПРЕТ В END
+        if (worldName.contains("end")) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED + "✗ Ти не можеш їсти в Ендерміру!");
+            player.sendMessage(ChatColor.DARK_PURPLE + "✗ Ти не можеш їсти в Ендерміру!");
             return;
         }
         
+        // ПЕРЕВІРКА ДОЗВОЛЕНОЇ ЗОНИ В ЗВИЧАЙНОМУ СВІТІ
         FoodZone zone = plugin.getConfigManager().getZoneAtLocation(player.getLocation());
         
         if (zone != null) {

@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.World;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.Action;
+import org.bukkit.action.Action;
 import com.foodrestriction.FoodRestrictionPlugin;
 import com.foodrestriction.ZoneMarker;
 import com.foodrestriction.config.ConfigManager.FoodZone;
@@ -28,33 +28,67 @@ public class FoodEatingListener implements Listener {
         ItemStack item = event.getItem();
         Action action = event.getAction();
         
-        // ПАЛИЦЯ ДЛЯ ПОЗНАЧЕННЯ МЕНЬНИЦІ
-        if (item != null && item.getType() == Material.STICK) {
+        // ════════════════════════════════════════════════════════════
+        // МОТИГА ДЛЯ ПОЗНАЧЕННЯ МЕНЬНИЦІ (ТІЛЬКИ ДЛЯ АДМИНІВ)
+        // ════════════════════════════════════════════════════════════
+        
+        if (item != null && item.getType() == Material.NETHERITE_PICKAXE) {
+            
+            // ПЕРЕВІРКА ЧИ АДМІН
+            if (!player.isOp() && !player.hasPermission("foodrestriction.zone.create")) {
+                player.sendMessage(ChatColor.RED + "✗ Тільки адміни можуть виділяти території!");
+                event.setCancelled(true);
+                return;
+            }
+            
+            // ЛІВИЙ КЛІК = ПОЗИЦІЯ 1
             if (action == Action.LEFT_CLICK_BLOCK) {
                 Block block = event.getClickedBlock();
                 if (block != null) {
                     ZoneMarker.setFirstPosition(player, block.getLocation());
+                    player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                    player.sendMessage(ChatColor.GREEN + "✓ Позиція 1 встановлена!");
+                    player.sendMessage(ChatColor.GRAY + "X:" + block.getX() + " Y:" + block.getY() + " Z:" + block.getZ());
+                    player.sendMessage(ChatColor.YELLOW + "Тепер клікни ПРАВОЮ мотигою на другу точку");
+                    player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                     event.setCancelled(true);
                     return;
                 }
             }
             
+            // ПРАВИЙ КЛІК = ПОЗИЦІЯ 2
             if (action == Action.RIGHT_CLICK_BLOCK) {
                 Block block = event.getClickedBlock();
                 if (block != null) {
+                    
+                    // ПЕРЕВІРКА ЧИ ПЕРШУ ПОЗИЦІЮ ВЖЕ ВСТАНОВИВ
+                    if (ZoneMarker.getFirstPosition(player) == null) {
+                        player.sendMessage(ChatColor.RED + "✗ Спочатку клікни ЛІВОЮ мотигою на першу точку!");
+                        event.setCancelled(true);
+                        return;
+                    }
+                    
                     ZoneMarker.setSecondPosition(player, block.getLocation());
                     event.setCancelled(true);
                     
-                    player.sendMessage(ChatColor.BLUE + "════════════════════════════════════");
+                    player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                    player.sendMessage(ChatColor.GREEN + "✓ Позиція 2 встановлена!");
+                    player.sendMessage(ChatColor.GRAY + "X:" + block.getX() + " Y:" + block.getY() + " Z:" + block.getZ());
+                    player.sendMessage("");
                     player.sendMessage(ZoneMarker.getPositionInfo(player));
-                    player.sendMessage(ChatColor.YELLOW + "Тепер виконай: /foodzone create <назва>");
-                    player.sendMessage(ChatColor.BLUE + "════════════════════════════════════");
+                    player.sendMessage("");
+                    player.sendMessage(ChatColor.YELLOW + "Тепер виконай команду:");
+                    player.sendMessage(ChatColor.WHITE + "/foodzone create <НазваТеріторії>");
+                    player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                     return;
                 }
             }
         }
         
+        // ════════════════════════════════════════════════════════════
         // БЛОКУВАННЯ ЇЖІ
+        // ════════════════════════════════════════════════════════════
+        
         if (item == null) {
             return;
         }
@@ -63,34 +97,39 @@ public class FoodEatingListener implements Listener {
             return;
         }
         
-        if (player.hasPermission("foodrestriction.bypass")) {
+        // АДМІНИ МОЖУТЬ ЇСТИ СКРІЗЬ
+        if (player.isOp() || player.hasPermission("foodrestriction.bypass")) {
             return;
         }
         
         World world = player.getWorld();
         String worldName = world.getName();
         
+        // ЗАПРЕТ В NETHER
         if (worldName.equals("world_nether") || worldName.endsWith("_nether")) {
             event.setCancelled(true);
             player.sendMessage(ChatColor.RED + "✗ Ти не можеш їсти в Нижнему світу!");
             return;
         }
         
+        // ЗАПРЕТ В END
         if (worldName.equals("world_the_end") || worldName.endsWith("_the_end")) {
             event.setCancelled(true);
             player.sendMessage(ChatColor.RED + "✗ Ти не можеш їсти в Ендерміру!");
             return;
         }
         
+        // ПЕРЕВІРКА ДОЗВОЛЕНОЇ ЗОНИ
         FoodZone zone = plugin.getConfigManager().getZoneAtLocation(player.getLocation());
         
         if (zone != null) {
-            return;
+            return; // ДОЗВОЛИТИ ЇЖУ В ЗОНІ
         }
         
+        // ЗАПРЕТИТЬ ЇЖУ ЗА МЕЖАМИ ЗОН
         event.setCancelled(true);
         player.sendMessage(ChatColor.RED + "✗ У цьому місці їжа заборонена!");
-        player.sendMessage(ChatColor.YELLOW + "Йди в дозволену територію для їжи.");
+        player.sendMessage(ChatColor.YELLOW + "📍 Йди в дозволену територію для їжи.");
     }
     
     private boolean isFoodItem(Material material) {

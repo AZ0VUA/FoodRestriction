@@ -54,56 +54,76 @@ public class FoodZoneCommand implements CommandExecutor {
     }
     
     private boolean handleCreate(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("foodrestriction.zone.create")) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Немаєму прав!");
-            return true;
-        }
-        
+        // *** ПЕРЕВІРКА НА АДМІНА ***
         if (!(sender instanceof Player)) {
             sender.sendMessage(PREFIX + ChatColor.RED + "Ця команда працює тільки для гравців!");
             return true;
         }
         
-        if (args.length < 2) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Використання: /foodzone create <назва>");
-            sender.sendMessage(ChatColor.GRAY + "Клікни палицею на 2 точки, потім виконай команду");
+        Player player = (Player) sender;
+        
+        // ПЕРЕВІРКА ЧИ АДМІН ЧИ МАЄ ДОЗВІЛ
+        if (!player.isOp() && !player.hasPermission("foodrestriction.zone.create")) {
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Тільки адміни можуть створювати зони!");
+            player.sendMessage(ChatColor.GRAY + "Запитай адміна щоб видати тобі мотигу");
             return true;
         }
         
-        Player player = (Player) sender;
+        if (args.length < 2) {
+            player.sendMessage(PREFIX + ChatColor.RED + "Використання: /foodzone create <назва>");
+            player.sendMessage(ChatColor.GRAY + "1. Клікни ЛІВОЮ мотигою на першу точку");
+            player.sendMessage(ChatColor.GRAY + "2. Клікни ПРАВОЮ мотигою на другу точку");
+            player.sendMessage(ChatColor.GRAY + "3. Введи цю команду");
+            return true;
+        }
+        
         String zoneName = args[1];
         
         Location pos1 = ZoneMarker.getFirstPosition(player);
         Location pos2 = ZoneMarker.getSecondPosition(player);
         
         if (pos1 == null || pos2 == null) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Спочатку позначь дві точки палицею!");
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Спочатку позначь дві точки мотигою!");
+            player.sendMessage(ChatColor.GRAY + "ЛІВА КНОПКА = Позиція 1");
+            player.sendMessage(ChatColor.GRAY + "ПРАВА КНОПКА = Позиція 2");
             return true;
         }
         
         ConfigManager configManager = plugin.getConfigManager();
         if (configManager.createZone(zoneName, pos1, pos2)) {
-            sender.sendMessage(PREFIX + ChatColor.GREEN + "✓ Зона '" + zoneName + "' успішно створена!");
+            player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage(PREFIX + ChatColor.GREEN + "✓ Зона '" + zoneName + "' успішно створена!");
             int volume = Math.abs(pos1.getBlockX() - pos2.getBlockX()) *
                         Math.abs(pos1.getBlockY() - pos2.getBlockY()) *
                         Math.abs(pos1.getBlockZ() - pos2.getBlockZ());
-            sender.sendMessage(ChatColor.GRAY + "Обсяг: " + volume + " блоків");
+            player.sendMessage(ChatColor.GRAY + "Обсяг: " + volume + " блоків³");
+            player.sendMessage(ChatColor.GRAY + "Світ: " + pos1.getWorld().getName());
+            player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             ZoneMarker.clearPositions(player);
         } else {
-            sender.sendMessage(PREFIX + ChatColor.RED + "✗ Зона з такою назвою вже існує!");
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Зона з такою назвою вже існує!");
+            player.sendMessage(ChatColor.GRAY + "Виберіть іншу назву");
         }
         
         return true;
     }
     
     private boolean handleDelete(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("foodrestriction.zone.delete")) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Немаєму прав!");
+        // *** ПЕРЕВІРКА НА АДМІНА ***
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(PREFIX + ChatColor.RED + "Ця команда працює тільки для гравців!");
+            return true;
+        }
+        
+        Player player = (Player) sender;
+        
+        if (!player.isOp() && !player.hasPermission("foodrestriction.zone.delete")) {
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Тільки адміни можуть видаляти зони!");
             return true;
         }
         
         if (args.length < 2) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Використання: /foodzone delete <назва>");
+            player.sendMessage(PREFIX + ChatColor.RED + "Використання: /foodzone delete <назва>");
             return true;
         }
         
@@ -111,20 +131,16 @@ public class FoodZoneCommand implements CommandExecutor {
         ConfigManager configManager = plugin.getConfigManager();
         
         if (configManager.deleteZone(zoneName)) {
-            sender.sendMessage(PREFIX + ChatColor.GREEN + "✓ Зона '" + zoneName + "' видалена!");
+            player.sendMessage(PREFIX + ChatColor.GREEN + "✓ Зона '" + zoneName + "' видалена!");
         } else {
-            sender.sendMessage(PREFIX + ChatColor.RED + "✗ Зона не знайдена!");
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Зона не знайдена!");
         }
         
         return true;
     }
     
     private boolean handleList(CommandSender sender) {
-        if (!sender.hasPermission("foodrestriction.zone.list")) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Немаєму прав!");
-            return true;
-        }
-        
+        // ЦЯ КОМАНДА ДОСТУПНА ВСІМ
         ConfigManager configManager = plugin.getConfigManager();
         java.util.Collection<FoodZone> zones = configManager.getAllZones();
         
@@ -157,22 +173,32 @@ public class FoodZoneCommand implements CommandExecutor {
         
         sender.sendMessage(PREFIX + ChatColor.BLUE + "════════════════════════════════════");
         if (zone != null) {
-            sender.sendMessage(ChatColor.GREEN + "✓ Ти в дозволеній зоні: " + ChatColor.WHITE + zone.getName());
+            sender.sendMessage(ChatColor.GREEN + "✓ Ти в дозволеній зоні їжи: " + ChatColor.WHITE + zone.getName());
+            sender.sendMessage(ChatColor.GRAY + "Тут можна їсти!");
         } else {
             sender.sendMessage(ChatColor.RED + "✗ Ти НЕ в дозволеній зоні!");
+            sender.sendMessage(ChatColor.YELLOW + "Йди в дозволену територію для їжи");
         }
         sender.sendMessage(ChatColor.BLUE + "════════════════════════════════════");
         return true;
     }
     
     private boolean handleReload(CommandSender sender) {
-        if (!sender.hasPermission("foodrestriction.reload")) {
-            sender.sendMessage(PREFIX + ChatColor.RED + "Немаєму прав!");
+        // *** ПЕРЕВІРКА НА АДМІНА ***
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(PREFIX + ChatColor.RED + "Ця команда працює тільки для гравців!");
+            return true;
+        }
+        
+        Player player = (Player) sender;
+        
+        if (!player.isOp() && !player.hasPermission("foodrestriction.reload")) {
+            player.sendMessage(PREFIX + ChatColor.RED + "✗ Тільки адміни можуть перезавантажувати конфіг!");
             return true;
         }
         
         plugin.getConfigManager().loadConfig();
-        sender.sendMessage(PREFIX + ChatColor.GREEN + "✓ Конфіг перезавантажено!");
+        player.sendMessage(PREFIX + ChatColor.GREEN + "✓ Конфіг перезавантажено!");
         return true;
     }
     
@@ -180,11 +206,11 @@ public class FoodZoneCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "╔════════════════════════════════════╗");
         sender.sendMessage(ChatColor.BLUE + "║   FoodRestriction Команди          ║");
         sender.sendMessage(ChatColor.BLUE + "╠════════════════════════════════════╣");
-        sender.sendMessage(ChatColor.YELLOW + "/foodzone create <назва>" + ChatColor.GRAY + " - Створити нову зону");
-        sender.sendMessage(ChatColor.YELLOW + "/foodzone delete <назва>" + ChatColor.GRAY + " - Видалити зону");
+        sender.sendMessage(ChatColor.YELLOW + "/foodzone create <назва>" + ChatColor.GRAY + " - Створити зону (АДМІН)");
+        sender.sendMessage(ChatColor.YELLOW + "/foodzone delete <назва>" + ChatColor.GRAY + " - Видалити зону (АДМІН)");
         sender.sendMessage(ChatColor.YELLOW + "/foodzone list" + ChatColor.GRAY + " - Список всіх зон");
         sender.sendMessage(ChatColor.YELLOW + "/foodzone info" + ChatColor.GRAY + " - Інформація про твоє місце");
-        sender.sendMessage(ChatColor.YELLOW + "/foodreload" + ChatColor.GRAY + " - Перезавантажити конфіг");
+        sender.sendMessage(ChatColor.YELLOW + "/foodreload" + ChatColor.GRAY + " - Перезавантажити конфіг (АДМІН)");
         sender.sendMessage(ChatColor.BLUE + "╚════════════════════════════════════╝");
     }
 }
